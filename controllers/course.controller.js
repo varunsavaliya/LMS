@@ -21,7 +21,6 @@ const getCourseById = async (req, res, next) => {
 
   try {
     const course = await Course.findById(id);
-    console.log(course);
     if (!course) {
       return next(new AppError("Course not found", 400));
     }
@@ -40,7 +39,7 @@ const createCourse = async (req, res, next) => {
   const { title, category, description, createdBy } = req.body;
 
   if (!title || !category || !description) {
-    return next(new AppError("Every fiels are mendatory", 400));
+    return next(new AppError("Every fields are mandatory", 400));
   }
 
   try {

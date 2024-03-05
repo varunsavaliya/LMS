@@ -7,8 +7,10 @@ import connectDB from "./config/dbConnection.js";
 import userRoutes from "./routes/user.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import courseRouter from "./routes/course.routes.js";
-import lectureRouter from "./routes/lecture.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import miscellaneousRouter from "./routes/miscellaneous.routes.js";
+import fs from 'fs'
+import path from "path";
 
 dotenv.config();
 
@@ -19,16 +21,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.unsubscribe(
   cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: '*',
     credential: true,
   })
 );
 app.use(cookieParser());
-app.use(morgan("dev"));
+
+
+var accessLogStream = fs.createWriteStream(path.join('', 'access.log'), { flags: 'a' })
+
+app.use(morgan("combined", { stream: accessLogStream }));
+
+app.use(function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 // connection to db
 connectDB();
 
+app.use("/api/v1", miscellaneousRouter);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/payment", paymentRoutes);

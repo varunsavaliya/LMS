@@ -31,7 +31,6 @@ export const buySubscription = async (req, res, next) => {
       total_count: 1,
     });
 
-    console.log(JSON.stringify(subscription));
     user.subscription.id = subscription.id;
     user.subscription.status = subscription.status;
 

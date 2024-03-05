@@ -21,9 +21,7 @@ const fileFilter = (req, file, cb) => {
     cb(new Error(`Unsupported file type! ${ext}`), false);
     return;
   }
-  console.log("1");
   cb(null, true);
-  console.log("2");
 };
 
 const upload = multer({

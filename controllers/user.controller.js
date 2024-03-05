@@ -7,7 +7,7 @@ import crypto from "crypto";
 
 const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
-  httpOnly: true,
+  httpOnly: false,
   secure: true,
 };
 
@@ -56,7 +56,6 @@ const register = async (req, res, next) => {
 
           // remove file from server
           fs.unlinkSync(`uploads/${req.file.filename}`);
-          console.log(JSON.stringify(req.file));
         }
       } catch (error) {
         return next(new AppError(error.message, 500));
@@ -71,7 +70,7 @@ const register = async (req, res, next) => {
 
     res.cookie("token", token, cookieOptions);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "User registered successfully",
       user,
@@ -84,25 +83,24 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return next(new AppError("All fields are requiired", 400));
+    return next(new AppError("All fields are required", 400));
   }
 
   try {
     const user = await User.findOne({ email }).select("+password");
-
-    if (!user || !user.comparePassword(password)) {
+    const isPassCorrect = await user.comparePassword(password);
+    if (!user || !isPassCorrect) {
       return next(new AppError("Email or password does not match", 400));
     }
 
     const token = await user.generateJWTToken();
-    console.log(token);
     user.password = undefined;
 
     res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       success: true,
-      message: "User loggedin successfully",
+      message: "User logged in successfully",
       user,
     });
   } catch (error) {
@@ -131,7 +129,7 @@ const getProfile = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "User details",
-      user,
+      data: user,
     });
   } catch (error) {
     return next(new AppError("Failed to fetch user detail", 500));
@@ -153,7 +151,6 @@ const forgotPassword = async (req, res, next) => {
     const resetToken = await user.generatePasswordResetToken();
 
     await user.save();
-    console.log(resetToken);
 
     const resetPasswordURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     const subject = "Reset your password";
@@ -226,11 +223,15 @@ const changePassword = async (req, res, next) => {
       return next(new AppError("User does not exists", 400));
     }
 
-    const isPasswordMatched = await user.comparePassword(oldPassword);
-    console.log(isPasswordMatched);
+    const isOldPasswordMatched = await user.comparePassword(oldPassword);
+    const isNewPasswordMatched = await user.comparePassword(newPassword);
 
-    if (!isPasswordMatched) {
+    if (!isOldPasswordMatched) {
       return next(new AppError("Old password is incorrect", 400));
+    }
+
+    if (isNewPasswordMatched) {
+      return next(new AppError("New password is same as old password", 400));
     }
 
     user.password = newPassword;
@@ -280,7 +281,6 @@ const updateProfile = async (req, res, next) => {
 
           // remove file from server
           fs.unlinkSync(`uploads/${req.file.filename}`);
-          console.log(JSON.stringify(req.file));
         }
       } catch (error) {
         return next(new AppError(error.message, 500));
