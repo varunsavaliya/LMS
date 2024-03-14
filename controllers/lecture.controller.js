@@ -3,6 +3,26 @@ import AppError from "../utils/error.util.js";
 import fs from "fs/promises";
 import cloudinary from "cloudinary";
 
+const getAllLectures = async (req, res, next) => {
+  const { courseId } = req.params;
+
+  try {
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return next(new AppError("Course not found", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course lectures fetched successfully",
+      data: course.lectures,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
 const getLectureById = async (req, res, next) => {
   const { courseId, lectureId } = req.params;
 
@@ -23,7 +43,7 @@ const getLectureById = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      lecture,
+      data: lecture,
     });
   } catch (error) {
     return next(new AppError(error.message, 500));
@@ -77,7 +97,7 @@ const createLecture = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Lecture added successfully!",
-      course,
+      data: course,
     });
   } catch (error) {
     return next(new AppError(error.message, 500));
@@ -134,7 +154,7 @@ const updateLecture = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Lecture updated successfully!",
-      lecture,
+      data: lecture,
     });
   } catch (error) {
     return next(new AppError(error.message, 500));
@@ -171,4 +191,10 @@ const deleteLecture = async (req, res, next) => {
   }
 };
 
-export { getLectureById, createLecture, updateLecture, deleteLecture };
+export {
+  getAllLectures,
+  getLectureById,
+  createLecture,
+  updateLecture,
+  deleteLecture,
+};

@@ -88,7 +88,8 @@ const login = async (req, res, next) => {
 
   try {
     const user = await User.findOne({ email }).select("+password");
-    const isPassCorrect = await user.comparePassword(password);
+    let isPassCorrect;
+    if (user) isPassCorrect = await user.comparePassword(password);
     if (!user || !isPassCorrect) {
       return next(new AppError("Email or password does not match", 400));
     }

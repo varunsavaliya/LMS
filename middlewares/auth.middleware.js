@@ -1,7 +1,8 @@
 import AppError from "../utils/error.util.js";
 import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
-const isLoggedIn = (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
@@ -10,7 +11,7 @@ const isLoggedIn = (req, res, next) => {
 
   const userDetail = jwt.verify(token, process.env.JWT_SECRET);
 
-  req.user = userDetail;
+  req.user = await User.findById(userDetail.id);
 
   next();
 };

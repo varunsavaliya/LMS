@@ -31,6 +31,6 @@ courseRouter
   .put(isLoggedIn, authorizedRoles("ADMIN"), updateCourse)
   .delete(isLoggedIn, authorizedRoles("ADMIN"), deleteCourse);
 
-courseRouter.use("/lecture", isLoggedIn, lectureRouter);
+courseRouter.use("/lectures", isLoggedIn, lectureRouter);
 
 export default courseRouter;

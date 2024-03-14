@@ -8,7 +8,7 @@ const getAllCourses = async (req, res, next) => {
     const courses = await Course.find({}).select("-lectures");
     res.status(200).json({
       success: true,
-      message: "All courses",
+      message: "Courses fetched successfully",
       data: courses,
     });
   } catch (error) {
@@ -27,7 +27,7 @@ const getCourseById = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `course Id: ${id}`,
+      message: "Course fetched successfully",
       data: course.lectures,
     });
   } catch (error) {
