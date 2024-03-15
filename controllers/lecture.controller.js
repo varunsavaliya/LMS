@@ -2,6 +2,7 @@ import Course from "../models/course.model.js";
 import AppError from "../utils/error.util.js";
 import fs from "fs/promises";
 import cloudinary from "cloudinary";
+import { destroyFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.util.js";
 
 const getAllLectures = async (req, res, next) => {
   const { courseId } = req.params;
@@ -74,13 +75,11 @@ const createLecture = async (req, res, next) => {
 
     if (req.file) {
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
-        });
+        const result = await uploadToCloudinary(req.file.path)
 
         if (result) {
-          (lectureData.lecture.public_id = result.public_id),
-            (lectureData.lecture.secure_url = result.secure_url);
+          lectureData.lecture.public_id = result.public_id;
+          lectureData.lecture.secure_url = result.secure_url;
         }
 
         fs.rm(`uploads/${req.file.filename}`);
@@ -133,10 +132,8 @@ const updateLecture = async (req, res, next) => {
 
     if (req.file) {
       try {
-        await cloudinary.v2.uploader.destroy(lecture.lecture.public_id);
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
-        });
+        destroyFromCloudinary(lecture.lecture.public_id)
+        const result = await uploadToCloudinary(req.file.path)
 
         if (result) {
           (lecture.lecture.public_id = result.public_id),
@@ -175,13 +172,13 @@ const deleteLecture = async (req, res, next) => {
       (lec) => lec._id.toString() === lectureId
     );
 
-    if (!lectureIndex) {
+    if (lectureIndex===-1) {
       return next(new AppError("Lecture not found", 404));
     }
 
     course.lectures.splice(lectureIndex, 1);
     course.numbersOfLectures = course.lectures.length;
-
+    course.save();
     res.status(200).json({
       success: true,
       message: "Lecture deleted successfully",

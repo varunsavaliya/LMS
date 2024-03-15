@@ -12,13 +12,23 @@ import upload from "../middlewares/multer.middleware.js";
 const lectureRouter = Router();
 lectureRouter
   .route("/:courseId")
-  .get(getAllLectures)
-  .post(authorizedRoles("ADMIN"), upload.single("lecture"), createLecture);
+  .get(isLoggedIn, getAllLectures)
+  .post(
+    isLoggedIn,
+    authorizedRoles("ADMIN"),
+    upload.single("lecture"),
+    createLecture
+  );
 
 lectureRouter
   .route("/:courseId/:lectureId")
-  .get(getLectureById)
-  .put(authorizedRoles("ADMIN"), upload.single("lecture"), updateLecture)
-  .delete(authorizedRoles("ADMIN"), deleteLecture);
+  .get(isLoggedIn, getLectureById)
+  .put(
+    isLoggedIn,
+    authorizedRoles("ADMIN"),
+    upload.single("lecture"),
+    updateLecture
+  )
+  .delete(isLoggedIn, authorizedRoles("ADMIN"), deleteLecture);
 
 export default lectureRouter;

@@ -1,4 +1,8 @@
 import Course from "../models/course.model.js";
+import {
+  destroyFromCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinary.util.js";
 import AppError from "../utils/error.util.js";
 import cloudinary from "cloudinary";
 import fs from "fs/promises";
@@ -62,13 +66,11 @@ const createCourse = async (req, res, next) => {
 
     if (req.file) {
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
-        });
+        const result = await uploadToCloudinary(req.file.path)
 
         if (result) {
-          (course.thumbnail.public_id = result.public_id),
-            (course.thumbnail.secure_url = result.secure_url);
+          course.thumbnail.public_id = result.public_id;
+          course.thumbnail.secure_url = result.secure_url;
         }
 
         fs.rm(`uploads/${req.file.filename}`);
@@ -104,6 +106,22 @@ const updateCourse = async (req, res, next) => {
 
     if (!course) {
       return next(new AppError("Course not found", 400));
+    }
+
+    if (req.file) {
+      try {
+        destroyFromCloudinary(course.thumbnail.public_id);
+        const result = await uploadToCloudinary(req.file.path);
+
+        if (result) {
+          course.thumbnail.public_id = result.public_id;
+          course.thumbnail.secure_url = result.secure_url;
+        }
+
+        fs.rm(`uploads/${req.file.filename}`);
+      } catch (error) {
+        return next(new AppError(error.message, 400));
+      }
     }
 
     await course.save();

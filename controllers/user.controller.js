@@ -4,6 +4,10 @@ import cloudinary from "cloudinary";
 import fs from "fs";
 import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
+import {
+  destroyFromCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinary.util.js";
 
 const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -42,8 +46,7 @@ const register = async (req, res, next) => {
 
     if (req.file) {
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
+        const result = await uploadToCloudinary(req.file.path, {
           width: 250,
           height: 250,
           gravity: "face",
@@ -266,10 +269,10 @@ const updateProfile = async (req, res, next) => {
     }
 
     if (req.file) {
-      await cloudinary.v2.uploader.destroy(user.avatar.public_id);
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
+        if (user?.avatar?.public_id)
+          destroyFromCloudinary(user.avatar.public_id);
+        const result = await uploadToCloudinary(req.file.path, {
           width: 250,
           height: 250,
           gravity: "face",

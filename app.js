@@ -9,8 +9,10 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 import courseRouter from "./routes/course.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import miscellaneousRouter from "./routes/miscellaneous.routes.js";
-import fs from 'fs'
+import fs from "fs";
 import path from "path";
+import lectureRouter from "./routes/lecture.routes.js";
+import { isLoggedIn } from "./middlewares/auth.middleware.js";
 
 dotenv.config();
 
@@ -19,26 +21,26 @@ const app = express();
 // middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.unsubscribe(
-  cors({
-    origin: '*',
-    credential: true,
-  })
-);
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
-
-var accessLogStream = fs.createWriteStream(path.join('', 'access.log'), { flags: 'a' })
+var accessLogStream = fs.createWriteStream(path.join("", "access.log"), {
+  flags: "a",
+});
 
 app.use(morgan("combined", { stream: accessLogStream }));
 
-app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+//   res.setHeader("Access-Control-Allow-Credentials", true);
+//   next();
+// });
 
 // connection to db
 connectDB();
@@ -46,6 +48,7 @@ connectDB();
 app.use("/api/v1", miscellaneousRouter);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/course", courseRouter);
+// app.use("/api/v1/lectures", lectureRouter);
 app.use("/api/v1/payment", paymentRoutes);
 
 app.use("/ping", (req, res) => {

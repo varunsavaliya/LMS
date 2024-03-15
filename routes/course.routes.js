@@ -28,7 +28,12 @@ courseRouter
 courseRouter
   .route("/:id")
   .get(isLoggedIn, authorizedSubscription, getCourseById)
-  .put(isLoggedIn, authorizedRoles("ADMIN"), updateCourse)
+  .put(
+    isLoggedIn,
+    authorizedRoles("ADMIN"),
+    upload.single("thumbnail"),
+    updateCourse
+  )
   .delete(isLoggedIn, authorizedRoles("ADMIN"), deleteCourse);
 
 courseRouter.use("/lectures", isLoggedIn, lectureRouter);
