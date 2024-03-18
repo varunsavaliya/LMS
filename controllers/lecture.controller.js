@@ -1,7 +1,6 @@
 import Course from "../models/course.model.js";
 import AppError from "../utils/error.util.js";
 import fs from "fs/promises";
-import cloudinary from "cloudinary";
 import { destroyFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.util.js";
 
 const getAllLectures = async (req, res, next) => {
@@ -89,7 +88,6 @@ const createLecture = async (req, res, next) => {
     }
 
     course.lectures.push(lectureData);
-    course.numbersOfLectures = course.lectures.length;
 
     await course.save();
 
@@ -177,7 +175,6 @@ const deleteLecture = async (req, res, next) => {
     }
 
     course.lectures.splice(lectureIndex, 1);
-    course.numbersOfLectures = course.lectures.length;
     course.save();
     res.status(200).json({
       success: true,

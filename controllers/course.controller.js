@@ -4,12 +4,11 @@ import {
   uploadToCloudinary,
 } from "../utils/cloudinary.util.js";
 import AppError from "../utils/error.util.js";
-import cloudinary from "cloudinary";
 import fs from "fs/promises";
 
 const getAllCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find({}).select("-lectures");
+    const courses = await Course.find();
     res.status(200).json({
       success: true,
       message: "Courses fetched successfully",

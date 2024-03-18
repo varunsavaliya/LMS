@@ -113,17 +113,29 @@ export const cancelSubscription = async (req, res, next) => {
 };
 
 export const allPayments = async (req, res, next) => {
-  const { count } = req.body;
   try {
-    const subscriptions = await razorPay.subscriptions.all({
-      count: count | 10,
+    let subscriptions = await razorPay.subscriptions.all();
+    subscriptions = subscriptions.items.filter(
+      (subscription) => subscription.status === "completed"
+    );
+    const allPayments = await Payment.find();
+    const paymentsByMonth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    allPayments.forEach((payment) => {
+      const month = payment.createdAt.getMonth();
+      if (paymentsByMonth.indexOf(month)) {
+        paymentsByMonth[month] += 1;
+      } else {
+        paymentsByMonth[month] = 1;
+      }
     });
-    const payments = await Payment.find();
     res.status(200).json({
       success: true,
       message: "All payments",
-      payments,
-      subscriptions,
+      data: {
+        allPayments,
+        subscriptions,
+        paymentsByMonth,
+      },
     });
   } catch (error) {
     return next(new AppError(error.message, 400));

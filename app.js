@@ -13,6 +13,7 @@ import fs from "fs";
 import path from "path";
 import lectureRouter from "./routes/lecture.routes.js";
 import { isLoggedIn } from "./middlewares/auth.middleware.js";
+import statsRoutes from "./routes/stats.routes.js";
 
 dotenv.config();
 
@@ -48,8 +49,8 @@ connectDB();
 app.use("/api/v1", miscellaneousRouter);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/course", courseRouter);
-// app.use("/api/v1/lectures", lectureRouter);
 app.use("/api/v1/payment", paymentRoutes);
+app.use("/api/v1/stats", statsRoutes);
 
 app.use("/ping", (req, res) => {
   res.send("pong");
