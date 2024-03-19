@@ -1,7 +1,11 @@
 import Course from "../models/course.model.js";
 import AppError from "../utils/error.util.js";
 import fs from "fs/promises";
-import { destroyFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.util.js";
+import {
+  destroyFromCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinary.util.js";
+import { UserRole } from "../constants/UserRoles.constant.js";
 
 const getAllLectures = async (req, res, next) => {
   const { courseId } = req.params;
@@ -52,6 +56,7 @@ const getLectureById = async (req, res, next) => {
 
 const createLecture = async (req, res, next) => {
   const { courseId } = req.params;
+  const { user } = req;
   const { title, description } = req.body;
   if (!title || !description) {
     return next(new AppError("All fields are required", 400));
@@ -61,6 +66,10 @@ const createLecture = async (req, res, next) => {
 
     if (!course) {
       return next(new AppError("Course not found", 400));
+    }
+
+    if (user.role !== UserRole.Admin && !course.createdBy.equals(user._id)) {
+      return next(new AppError("You can not add lectures to this course", 401));
     }
 
     const lectureData = {
@@ -74,7 +83,7 @@ const createLecture = async (req, res, next) => {
 
     if (req.file) {
       try {
-        const result = await uploadToCloudinary(req.file.path)
+        const result = await uploadToCloudinary(req.file.path);
 
         if (result) {
           lectureData.lecture.public_id = result.public_id;
@@ -130,8 +139,8 @@ const updateLecture = async (req, res, next) => {
 
     if (req.file) {
       try {
-        destroyFromCloudinary(lecture.lecture.public_id)
-        const result = await uploadToCloudinary(req.file.path)
+        destroyFromCloudinary(lecture.lecture.public_id);
+        const result = await uploadToCloudinary(req.file.path);
 
         if (result) {
           (lecture.lecture.public_id = result.public_id),
@@ -170,7 +179,7 @@ const deleteLecture = async (req, res, next) => {
       (lec) => lec._id.toString() === lectureId
     );
 
-    if (lectureIndex===-1) {
+    if (lectureIndex === -1) {
       return next(new AppError("Lecture not found", 404));
     }
 

@@ -2,6 +2,7 @@ import express from "express";
 import {
   changePassword,
   forgotPassword,
+  getAllUsers,
   getProfile,
   login,
   logout,
@@ -14,6 +15,7 @@ import upload from "../middlewares/multer.middleware.js";
 
 const userRoutes = express.Router();
 
+userRoutes.get("/users", getAllUsers);
 userRoutes.post("/register", upload.single("avatar"), register);
 userRoutes.post("/login", login);
 userRoutes.get("/logout", logout);

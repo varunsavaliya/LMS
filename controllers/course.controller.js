@@ -1,3 +1,5 @@
+import { CourseStatus } from "../constants/CourseStatus.constant.js";
+import { UserRole } from "../constants/UserRoles.constant.js";
 import Course from "../models/course.model.js";
 import {
   destroyFromCloudinary,
@@ -8,7 +10,21 @@ import fs from "fs/promises";
 
 const getAllCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find({ isActive: true });
+    res.status(200).json({
+      success: true,
+      message: "Courses fetched successfully",
+      data: courses,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
+const getTutorCourses = async (req, res, next) => {
+  const { user } = req;
+  try {
+    const courses = await Course.find({ isActive: true, createdBy: user?._id });
     res.status(200).json({
       success: true,
       message: "Courses fetched successfully",
@@ -40,6 +56,7 @@ const getCourseById = async (req, res, next) => {
 
 const createCourse = async (req, res, next) => {
   const { title, category, description, createdBy } = req.body;
+  const { role, _id } = req.user;
 
   if (!title || !category || !description) {
     return next(new AppError("Every fields are mandatory", 400));
@@ -50,11 +67,13 @@ const createCourse = async (req, res, next) => {
       title,
       description,
       category,
-      createdBy,
+      createdBy: role !== UserRole.Admin ? _id : createdBy,
       thumbnail: {
         public_id: "DUMMY",
         secure_url: "DUMMY",
       },
+      status:
+        role === UserRole.Admin ? CourseStatus.Approved : CourseStatus.Pending,
     });
 
     if (!course) {
@@ -65,7 +84,7 @@ const createCourse = async (req, res, next) => {
 
     if (req.file) {
       try {
-        const result = await uploadToCloudinary(req.file.path)
+        const result = await uploadToCloudinary(req.file.path);
 
         if (result) {
           course.thumbnail.public_id = result.public_id;
@@ -82,7 +101,11 @@ const createCourse = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `Course created successfully`,
+      message: `Course created successfully${
+        role !== UserRole.Admin
+          ? ", course will shown after admin approves your course"
+          : "."
+      }`,
       data: course,
     });
   } catch (error) {
@@ -92,19 +115,16 @@ const createCourse = async (req, res, next) => {
 
 const updateCourse = async (req, res, next) => {
   const { id } = req.params;
+  const { user } = req;
   try {
-    const course = await Course.findByIdAndUpdate(
-      id,
-      {
-        $set: req.body,
-      },
-      {
-        runValidators: true,
-      }
-    );
+    const course = await Course.findById(id);
 
     if (!course) {
       return next(new AppError("Course not found", 400));
+    }
+
+    if (user.role !== UserRole.Admin && !course.createdBy.equals(user._id)) {
+      return next(new AppError("You can not update this course", 401));
     }
 
     if (req.file) {
@@ -122,6 +142,7 @@ const updateCourse = async (req, res, next) => {
         return next(new AppError(error.message, 400));
       }
     }
+    course.set(req.body);
 
     await course.save();
 
@@ -160,4 +181,5 @@ export {
   createCourse,
   updateCourse,
   deleteCourse,
+  getTutorCourses,
 };

@@ -14,10 +14,23 @@ const cookieOptions = {
   secure: true,
 };
 
-const register = async (req, res, next) => {
-  const { fullName, email, password } = req.body;
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
 
-  if (!fullName || !email || !password) {
+const register = async (req, res, next) => {
+  const { fullName, email, password, role } = req.body;
+
+  if (!fullName || !email || !password || !role) {
     return next(new AppError("All fields are required", 400));
   }
 
@@ -31,6 +44,7 @@ const register = async (req, res, next) => {
       fullName,
       email,
       password,
+      role,
       avatar: {
         public_id: email,
         secure_url: "",
@@ -310,4 +324,5 @@ export {
   resetPassword,
   changePassword,
   updateProfile,
+  getAllUsers,
 };

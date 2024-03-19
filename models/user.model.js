@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { Schema, model } from "mongoose";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { UserRole } from "../constants/UserRoles.constant.js";
 
 const userSchema = new Schema(
   {
@@ -39,8 +40,12 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
-      default: "USER",
+      enum: [UserRole.User, UserRole.Admin, UserRole.Tutor],
+      default: UserRole.User,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     forgotPasswordToken: String,
     forgotPasswordExpiry: String,

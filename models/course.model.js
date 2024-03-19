@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { CourseStatus } from "../constants/CourseStatus.constant.js";
 
 const courseSchema = new Schema(
   {
@@ -47,9 +48,22 @@ const courseSchema = new Schema(
         },
       },
     ],
-    createdBy: {
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    status: {
       type: String,
-      required: true,
+      enum: [
+        CourseStatus.Approved,
+        CourseStatus.Pending,
+        CourseStatus.Declined,
+      ],
+      default: CourseStatus.Pending,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
     },
   },
   {

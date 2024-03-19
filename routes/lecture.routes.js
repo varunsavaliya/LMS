@@ -8,6 +8,7 @@ import {
 } from "../controllers/lecture.controller.js";
 import { authorizedRoles, isLoggedIn } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
+import { UserRole } from "../constants/UserRoles.constant.js";
 
 const lectureRouter = Router();
 lectureRouter
@@ -15,7 +16,7 @@ lectureRouter
   .get(isLoggedIn, getAllLectures)
   .post(
     isLoggedIn,
-    authorizedRoles("ADMIN"),
+    authorizedRoles(UserRole.Admin, UserRole.Tutor),
     upload.single("lecture"),
     createLecture
   );
