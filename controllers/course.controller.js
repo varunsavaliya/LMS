@@ -159,11 +159,13 @@ const updateCourse = async (req, res, next) => {
 const deleteCourse = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const course = await Course.findByIdAndDelete(id);
+    const course = await Course.findById(id);
 
     if (!course) {
       return next(new AppError("Course not found", 400));
     }
+    course.isActive = false;
+    course.save();
 
     res.status(200).json({
       success: true,
