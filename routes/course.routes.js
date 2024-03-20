@@ -38,7 +38,7 @@ courseRouter
   .get(isLoggedIn, authorizedSubscription, getCourseById)
   .put(
     isLoggedIn,
-    authorizedRoles(UserRole.Admin),
+    authorizedRoles(UserRole.Admin, UserRole.Tutor),
     upload.single("thumbnail"),
     updateCourse
   )

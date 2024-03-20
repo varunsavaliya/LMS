@@ -284,7 +284,7 @@ const updateProfile = async (req, res, next) => {
     if (req.file) {
       try {
         if (user?.avatar?.public_id)
-          destroyFromCloudinary(user.avatar.public_id);
+          await destroyFromCloudinary(user.avatar.public_id);
         const result = await uploadToCloudinary(req.file.path, {
           width: 250,
           height: 250,
@@ -298,6 +298,8 @@ const updateProfile = async (req, res, next) => {
 
           // remove file from server
           fs.unlinkSync(`uploads/${req.file.filename}`);
+        } else {
+          return next(new AppError("Failed to upload profile image", 400));
         }
       } catch (error) {
         return next(new AppError(error.message, 500));

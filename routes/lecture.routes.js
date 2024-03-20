@@ -26,7 +26,7 @@ lectureRouter
   .get(isLoggedIn, getLectureById)
   .put(
     isLoggedIn,
-    authorizedRoles("ADMIN"),
+    authorizedRoles(UserRole.Admin, UserRole.Tutor),
     upload.single("lecture"),
     updateLecture
   )

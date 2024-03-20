@@ -129,7 +129,7 @@ const updateCourse = async (req, res, next) => {
 
     if (req.file) {
       try {
-        destroyFromCloudinary(course.thumbnail.public_id);
+        await destroyFromCloudinary(course.thumbnail.public_id);
         const result = await uploadToCloudinary(req.file.path);
 
         if (result) {
