@@ -18,7 +18,7 @@ export const contact = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: "User logged in successfully",
+      message: "Message submitted successfully",
     });
   } catch (error) {
     return next(new AppError(error.message, 500));
