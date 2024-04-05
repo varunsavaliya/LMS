@@ -35,13 +35,13 @@ var accessLogStream = fs.createWriteStream(path.join("", "access.log"), {
 
 app.use(morgan("combined", { stream: accessLogStream }));
 
-// app.use(function (req, res, next) {
-//   res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
-//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-//   res.setHeader("Access-Control-Allow-Credentials", true);
-//   next();
-// });
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  next();
+});
 
 // connection to db
 connectDB();
