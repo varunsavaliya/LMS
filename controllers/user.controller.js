@@ -7,12 +7,7 @@ import {
   destroyFromCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinary.util.js";
-
-const cookieOptions = {
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  httpOnly: false,
-  secure: true,
-};
+import { cookieOptions } from "../config/cookie.config.js";
 
 const getAllUsers = async (req, res, next) => {
   try {
