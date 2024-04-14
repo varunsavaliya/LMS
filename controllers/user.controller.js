@@ -8,6 +8,7 @@ import {
   uploadToCloudinary,
 } from "../utils/cloudinary.util.js";
 import { cookieOptions } from "../config/cookie.config.js";
+import { config } from "../config/env.config.js";
 
 const getAllUsers = async (req, res, next) => {
   try {
@@ -164,7 +165,9 @@ const forgotPassword = async (req, res, next) => {
 
     await user.save();
 
-    const resetPasswordURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetPasswordURL = `${config.get(
+      "frontendUrl"
+    )}/reset-password/${resetToken}`;
     const subject = "Reset your password";
     const message = `You can reset your password by clicking on this link -> ${resetPasswordURL}`;
 

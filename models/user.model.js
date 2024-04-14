@@ -3,6 +3,7 @@ import { Schema, model } from "mongoose";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { UserRole } from "../constants/UserRoles.constant.js";
+import { config } from "../config/env.config.js";
 
 const userSchema = new Schema(
   {
@@ -10,7 +11,6 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Name is required"],
       maxLength: [50, "Name should be smaller than 50 characters"],
-      lowercase: true,
       trim: true,
     },
     email: {
@@ -76,9 +76,9 @@ userSchema.methods = {
         subscription: this.subscription,
         role: this.role,
       },
-      process.env.JWT_SECRET,
+      config.get("jwtSecret"),
       {
-        expiresIn: process.env.JWT_EXPIRY,
+        expiresIn: config.get("jwtExpiry"),
       }
     );
   },

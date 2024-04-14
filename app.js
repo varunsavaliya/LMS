@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import morgan from "morgan";
 import connectDB from "./config/dbConnection.js";
 import userRoutes from "./routes/user.routes.js";
@@ -11,11 +10,8 @@ import paymentRoutes from "./routes/payment.routes.js";
 import miscellaneousRouter from "./routes/miscellaneous.routes.js";
 import fs from "fs";
 import path from "path";
-import lectureRouter from "./routes/lecture.routes.js";
-import { isLoggedIn } from "./middlewares/auth.middleware.js";
 import statsRoutes from "./routes/stats.routes.js";
-
-dotenv.config();
+import { config } from "./config/env.config.js";
 
 const app = express();
 
@@ -23,7 +19,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: config.get("frontendUrl"),
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -36,7 +32,7 @@ var accessLogStream = fs.createWriteStream(path.join("", "access.log"), {
 app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  res.setHeader("Access-Control-Allow-Origin", config.get("frontendUrl"));
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Allow-Credentials", true);

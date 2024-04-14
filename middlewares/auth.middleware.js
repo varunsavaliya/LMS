@@ -1,6 +1,7 @@
 import AppError from "../utils/error.util.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { config } from "../config/env.config.js";
 
 const isLoggedIn = async (req, res, next) => {
   const { token } = req.cookies;
@@ -9,7 +10,7 @@ const isLoggedIn = async (req, res, next) => {
     return next(new AppError("Unauthenticated, please login again", 400));
   }
 
-  const userDetail = jwt.verify(token, process.env.JWT_SECRET);
+  const userDetail = jwt.verify(token, config.get("jwtSecret"));
 
   req.user = await User.findById(userDetail.id);
 

@@ -3,12 +3,13 @@ import User from "../models/user.model.js";
 import AppError from "../utils/error.util.js";
 import crypto from "crypto";
 import Payment from "../models/payment.model.js";
+import { config } from "../config/env.config.js";
 
 export const getRazorpayApiKey = async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Razorpay API key",
-    key: process.env.RAZORPAY_KEY_ID,
+    key: config.get("razorpayKeyId"),
   });
 };
 
@@ -26,7 +27,7 @@ export const buySubscription = async (req, res, next) => {
     }
 
     const subscription = await razorPay.subscriptions.create({
-      plan_id: process.env.RAZORPAY_PLAN_ID,
+      plan_id: config.get("razorpayPlanId"),
       customer_notify: 1,
       total_count: 1,
     });
@@ -60,7 +61,7 @@ export const verifySubscription = async (req, res, next) => {
     const subscriptionId = user.subscription.id;
 
     const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .createHmac("sha256", config.get("razorpaySecret"))
       .update(`${razorpay_payment_id}|${subscriptionId}`)
       .digest("hex");
 
